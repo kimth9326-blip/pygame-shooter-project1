@@ -102,14 +102,18 @@ class Game:
         hit_enemy_count = sum(len(hit_enemies) for hit_enemies in hits.values())
         self.score += hit_enemy_count * SCORE_PER_ENEMY
 
-        # TODO(F4): 플레이어 충돌, 화면 이탈 및 생명 처리
+        # 적이 플레이어와 충돌하면 해당 적을 제거하고 충돌한 적 수만큼 생명을 줄인다.
+        player_hits = pygame.sprite.spritecollide(self.player, self.enemies, True)
+        self.lives -= len(player_hits)
 
+        # 플레이어에 닿지 않고 화면 아래로 완전히 지나간 적도 생명을 하나 줄인다.
         for enemy in list(self.enemies):
             if enemy.rect.top > HEIGHT:
                 enemy.kill()
-                # TODO(F4): 화면 아래로 지나간 적만큼 생명 감소
+                self.lives -= 1
 
-        # TODO(F4): 생명이 0 이하이면 게임 오버
+        if self.lives <= 0:
+            self.end_game()
 
     def end_game(self):
         """게임 오버 처리."""
@@ -150,9 +154,12 @@ class Game:
             self.draw_text("Press SPACE to start", self.font, YELLOW, center=(cx, 540))
 
     def draw_game_over(self):
-        # TODO(F4): GAME OVER 와 이번 판 점수 표시
+        """게임 오버와 이번 판 점수를 화면 가운데 표시한다."""
+        center_x = WIDTH // 2
+        center_y = HEIGHT // 2
+        self.draw_text("GAME OVER", self.big_font, RED, center=(center_x, center_y - 75))
+        self.draw_text(f"SCORE: {self.score}", self.font, WHITE, center=(center_x, center_y + 5))
         # TODO(F5): 최고 점수와 재시작 안내 표시
-        pass
 
     # ---------------- 게임 루프 ----------------
     def step(self):
