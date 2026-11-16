@@ -97,7 +97,11 @@ class Game:
         self.bullets.update()
         self.enemies.update()
 
-        # TODO(F3): 총알과 적의 충돌 및 점수 처리
+        # 총알과 적이 충돌하면 둘 다 제거하고, 제거된 적 수만큼 점수를 올린다.
+        hits = pygame.sprite.groupcollide(self.bullets, self.enemies, True, True)
+        hit_enemy_count = sum(len(hit_enemies) for hit_enemies in hits.values())
+        self.score += hit_enemy_count * SCORE_PER_ENEMY
+
         # TODO(F4): 플레이어 충돌, 화면 이탈 및 생명 처리
 
         for enemy in list(self.enemies):
@@ -128,8 +132,8 @@ class Game:
         if self.game_over:
             self.screen.blit(self.dark_shade, (0, 0))
         self.screen.blit(self.hud_shade, (0, 0))
+        self.draw_text(f"SCORE: {self.score}", self.font, WHITE, topleft=(10, 10))
         self.draw_text(f"LIVES: {self.lives}", self.font, WHITE, topright=(WIDTH - 10, 10))
-        # TODO(F3): 현재 점수 표시
         if self.game_over:
             self.draw_game_over()
         pygame.display.flip()
