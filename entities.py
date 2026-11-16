@@ -36,7 +36,7 @@ class Background:
     def __init__(self):
         self.ground = load_frame(BACKGROUND_IMAGE, scale=BACKGROUND_SCALE)
         self.clouds = load_frame(CLOUDS_IMAGE, scale=BACKGROUND_SCALE)
-        self.x = (WIDTH - self.ground.get_width()) // 2  # 가운데 맞춤
+        self.x = (WIDTH - self.ground.get_width()) // 2
         self.ground_y = 0
         self.clouds_y = 0
 
@@ -45,7 +45,6 @@ class Background:
         self.clouds_y = (self.clouds_y + CLOUDS_SPEED) % (HEIGHT + self.clouds.get_height())
 
     def draw(self, screen):
-        # 같은 그림을 위아래로 이어 붙여 끊김 없이 반복한다.
         screen.blit(self.ground, (self.x, self.ground_y))
         screen.blit(self.ground, (self.x, self.ground_y - self.ground.get_height()))
         screen.blit(self.clouds, (self.x, self.clouds_y - self.clouds.get_height()))
@@ -66,15 +65,13 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.rect.x += PLAYER_SPEED
 
-        # 플레이어가 화면 밖으로 나가지 않도록 좌우 위치를 제한한다.
+        # 화면 좌우 경계를 벗어나지 않도록 제한한다.
         self.rect.left = max(0, self.rect.left)
         self.rect.right = min(WIDTH, self.rect.right)
 
     def shoot(self):
         """플레이어 위쪽 가운데에서 출발하는 총알 하나를 만들어 돌려준다."""
-        # TODO(F2): Bullet(x, y) 를 작성할 것.
-        #           x 는 플레이어의 가로 가운데, y 는 플레이어의 위쪽 끝이므로 참고.
-        return None
+        return Bullet(self.rect.centerx, self.rect.top)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -86,9 +83,9 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom=(x, y))
 
     def update(self):
-        # TODO(F2): 매 프레임 BULLET_SPEED 만큼 위로 움직이게 할 것.
-        #           총알이 화면 위로 완전히 나가면 self.kill() 로 없앨 것.
-        pass
+        self.rect.y -= BULLET_SPEED
+        if self.rect.bottom < 0:
+            self.kill()
 
 
 class Enemy(pygame.sprite.Sprite):
