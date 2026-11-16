@@ -14,15 +14,18 @@ SPAWN_ENEMY = pygame.USEREVENT + 1
 
 
 def load_high_score():
-    """HIGHSCORE_FILE 에서 최고 점수를 읽어 돌려준다."""
-    # TODO(F5): 최고 점수 파일 읽기
-    return 0
+    """최고 점수 파일을 읽는다. 파일이 없거나 숫자가 아니면 0을 반환한다."""
+    try:
+        with open(HIGHSCORE_FILE, "r", encoding="utf-8") as score_file:
+            return int(score_file.read().strip())
+    except (OSError, ValueError):
+        return 0
 
 
 def save_high_score(score):
-    """최고 점수를 HIGHSCORE_FILE 에 저장한다."""
-    # TODO(F5): 최고 점수 파일 저장
-    pass
+    """최고 점수를 파일에 저장해 다음 실행에도 유지한다."""
+    with open(HIGHSCORE_FILE, "w", encoding="utf-8") as score_file:
+        score_file.write(str(int(score)))
 
 
 class Game:
@@ -73,7 +76,8 @@ class Game:
                     bullet = self.player.shoot()
                     self.bullets.add(bullet)
                     self.all_sprites.add(bullet)
-                # TODO(F5): 게임 오버 상태에서 R 키로 재시작
+                elif event.key == pygame.K_r and self.game_over:
+                    self.reset()
 
     def handle_title_event(self, event):
         """시작 화면에서는 SPACE로 시작하고 ESC로 종료한다."""
@@ -116,9 +120,11 @@ class Game:
             self.end_game()
 
     def end_game(self):
-        """게임 오버 처리."""
+        """게임 오버 처리와 최고 점수 갱신."""
         self.game_over = True
-        # TODO(F5): 최고 점수 갱신 및 저장
+        if self.score > self.high_score:
+            self.high_score = self.score
+            save_high_score(self.high_score)
 
     # ---------------- 그리기 ----------------
     def draw_text(self, text, font, color, **position):
@@ -158,8 +164,15 @@ class Game:
         center_x = WIDTH // 2
         center_y = HEIGHT // 2
         self.draw_text("GAME OVER", self.big_font, RED, center=(center_x, center_y - 75))
-        self.draw_text(f"SCORE: {self.score}", self.font, WHITE, center=(center_x, center_y + 5))
-        # TODO(F5): 최고 점수와 재시작 안내 표시
+        self.draw_text(f"SCORE: {self.score}", self.font, WHITE, center=(center_x, center_y - 5))
+        self.draw_text(
+            f"HIGH SCORE: {self.high_score}", self.font, YELLOW,
+            center=(center_x, center_y + 40),
+        )
+        self.draw_text(
+            "Press R to restart", self.font, WHITE,
+            center=(center_x, center_y + 90),
+        )
 
     # ---------------- 게임 루프 ----------------
     def step(self):
